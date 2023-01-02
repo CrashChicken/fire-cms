@@ -1,45 +1,11 @@
-import { firestore } from "../../firebase";
-import { query, collection, getDocs, where } from "firebase/firestore";
 import ProjectCard from "../../components/ProjectCard";
 import Layout from "../../layouts/Layout";
-import { useEffect, useState } from "react";
-import { useCollectionOnce } from "react-firebase-hooks/firestore";
-import LoadingSpinner from "../../components/LoadingSpinner";
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import { MdAdd } from "react-icons/Md";
-
-type Project = {
-  id: string;
-  name: string;
-  description: string;
-  collaborators: string[];
-};
+import { Project } from "../../loaders/project";
 
 const ProjectList = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-
-  const q = query(
-    collection(firestore, "projects"),
-    where("owner", "==", "m3OcYdEgtRXi7swYVVOpZbCgzU62")
-  );
-  const [snapshot, loading, error] = useCollectionOnce(q);
-
-  useEffect(() => {
-    if (snapshot) {
-      const projects: Project[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const project: Project = {
-          id: doc.id,
-          name: data.name,
-          description: data.description ?? "",
-          collaborators: data.collaborators ?? [],
-        };
-        projects.push(project);
-      });
-      setProjects(projects);
-    }
-  }, [snapshot]);
+  const projects = useLoaderData() as Project[];
 
   return (
     <Layout title="Projects">
@@ -57,12 +23,6 @@ const ProjectList = () => {
             <ProjectCard key={project.id} {...project} />
           ))}
       </div>
-      {loading && <LoadingSpinner />}
-      {error && (
-        <p className="mt-8 rounded-2xl bg-red-100 p-4">
-          Error: {error.message}
-        </p>
-      )}
     </Layout>
   );
 };

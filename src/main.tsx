@@ -6,10 +6,12 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProjectList from "./pages/projects/ProjectList";
-import ProjectDetails from "./pages/projects/ProjectDetails";
+import ProjectDetails from "./pages/projects/ProjectPages";
 import PageEditor from "./pages/projects/PageEditor";
 import { IconContext } from "react-icons";
 import ProjectCreator from "./pages/projects/ProjectCreator";
+import { getProjectPages, getProjects } from "./loaders/project";
+import { z } from "zod";
 
 const router = createBrowserRouter([
   {
@@ -19,10 +21,16 @@ const router = createBrowserRouter([
   {
     path: "/projects",
     element: <ProjectList />,
+    loader: getProjects,
   },
   {
     path: "/projects/:projectId",
     element: <ProjectDetails />,
+    loader: ({ params }) => {
+      const projectSchema = z.string().length(20);
+      let projectId = projectSchema.parse(params.projectId);
+      return getProjectPages(projectId);
+    },
   },
   {
     path: "/projects/new",
